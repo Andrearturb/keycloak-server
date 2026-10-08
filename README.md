@@ -30,6 +30,24 @@ docker compose ps
 **Admin Console:** http://localhost:8080/admin  
 **Account Console:** http://localhost:8080/realms/enxoval/account  
 
+No desenvolvimento local, mantenha `KC_HOSTNAME=http://localhost:8080` no `.env`.
+Se trocar `KC_PORT`, atualize também a porta nessa URL. O hostname público fixo
+mantém o issuer consistente para navegador e API em Docker
+([documentação de hostname](https://www.keycloak.org/server/hostname)).
+Não use `host.docker.internal` como hostname público; esse endereço serve para
+a aplicação alcançar o servidor a partir dos containers.
+
+Para integrar o webapp local, mantenha `APP_ENXOVAL_URL=http://localhost:5180` e
+configure no `.env` do webapp `KEYCLOAK_HABILITADO=true`,
+`KEYCLOAK_URL=http://host.docker.internal:8080`,
+`KEYCLOAK_PUBLIC_URL=http://localhost:8080` e
+`KEYCLOAK_ISSUER=http://localhost:8080/realms/enxoval`.
+Recrie os containers API/frontend após alterar as variáveis.
+
+As credenciais administrativas ficam no `.env` local. Para usar o aplicativo,
+crie uma conta de família em **Cadastre-se** na tela de login; o administrador
+do realm `master` não é uma conta de família do realm `enxoval`.
+
 O client `webapp` inclui o scope padrão `basic`, necessário para o identificador
 `sub` no access token. Se você já importou uma versão anterior deste realm,
 adicione `basic` em **Clients → webapp → Client scopes** como **Default**.

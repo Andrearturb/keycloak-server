@@ -33,5 +33,6 @@ COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 # Copia os realms para importação automática na primeira inicialização
 COPY realms/ /opt/keycloak/data/import/
+COPY themes/ /opt/keycloak/themes/
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]

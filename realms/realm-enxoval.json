@@ -3,6 +3,10 @@
   "enabled": true,
   "displayName": "Enxoval Inteligente",
   "displayNameHtml": "<b>Enxoval Inteligente</b>",
+  "loginTheme": "enxoval",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["pt-BR"],
+  "defaultLocale": "pt-BR",
 
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,

@@ -34,6 +34,11 @@ O client `webapp` inclui o scope padrão `basic`, necessário para o identificad
 `sub` no access token. Se você já importou uma versão anterior deste realm,
 adicione `basic` em **Clients → webapp → Client scopes** como **Default**.
 
+O tema de login `enxoval` acompanha as cores, marca e fontes do aplicativo.
+Após mudar o tema, reconstrua a imagem com `docker compose up -d --build`.
+Para realms já existentes, selecione **Realm settings → Themes → Login theme → enxoval**.
+O tema herda os formulários do Keycloak e personaliza sua apresentação com CSS.
+
 ## Ativar login com Google
 
 1. Crie credenciais OAuth em https://console.cloud.google.com  

@@ -1,0 +1,107 @@
+services:
+  # ---------------------------------------------------------------------------
+  # Banco de dados do Keycloak (PostgreSQL dedicado)
+  # Separado do banco das aplicações — dados de identidade e dados de negócio
+  # nunca devem compartilhar a mesma instância.
+  # ---------------------------------------------------------------------------
+  keycloak-db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${KC_DB_NAME:?defina KC_DB_NAME no .env}
+      POSTGRES_USER: ${KC_DB_USER:?defina KC_DB_USER no .env}
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD:?defina KC_DB_PASSWORD no .env}
+    volumes:
+      - dados_keycloak_db:/var/lib/postgresql/data
+    networks:
+      - keycloak-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # Keycloak — Identity Provider central
+  #
+  # Modo de operação:
+  #   - Dev local:    KC_HOSTNAME_STRICT=false, KC_HTTP_ENABLED=true
+  #   - Produção:     KC_HOSTNAME=seu-dominio.com, TLS via reverse proxy (Caddy/Nginx)
+  #
+  # Primeiro boot com realm:
+  #   O diretório ./realms/ é montado em /opt/keycloak/data/import/.
+  #   O Keycloak importa os arquivos JSON automaticamente com --import-realm.
+  #   Na segunda inicialização o import é ignorado (realm já existe no banco).
+  #
+  # Admin Console: http://localhost:${KC_PORT}/admin
+  # Account Console: http://localhost:${KC_PORT}/realms/{realm}/account
+  # ---------------------------------------------------------------------------
+  keycloak:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # "start" usa a imagem otimizada pelo kc.sh build no Dockerfile.
+    # "--import-realm" só executa se o realm ainda não existir no banco.
+    command: start --optimized --import-realm
+    restart: unless-stopped
+    environment:
+      # Banco
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KC_DB_NAME}
+      KC_DB_USERNAME: ${KC_DB_USER}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+
+      # Credenciais do admin (usadas só no primeiro boot)
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN_USER:?defina KC_ADMIN_USER no .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?defina KC_ADMIN_PASSWORD no .env}
+
+      # Hostname — ajuste para produção
+      # Dev: KC_HOSTNAME_STRICT=false permite acesso via localhost
+      # Produção com TLS no proxy: mantenha HTTP interno habilitado.
+      KC_HOSTNAME_STRICT: "${KC_HOSTNAME_STRICT:-false}"
+      KC_HTTP_ENABLED: "${KC_HTTP_ENABLED:-true}"
+      KC_HOSTNAME: "${KC_HOSTNAME:-}"
+
+      # Configure xforwarded em produção quando o proxy sobrescrever os headers.
+      KC_PROXY_HEADERS: "${KC_PROXY_HEADERS:-xforwarded}"
+
+      # Health e métricas (habilitadas para monitoramento)
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+
+      # Log — "dev" é mais legível; use "default" em produção
+      KC_LOG_LEVEL: "${KC_LOG_LEVEL:-INFO}"
+
+      # Google OAuth — passado para o realm JSON via variável de ambiente.
+      # Deixe vazios: o login com Google ficará desabilitado no realm.
+      # Preencha após criar credenciais em console.cloud.google.com.
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      GOOGLE_IDP_HABILITADO: "${GOOGLE_IDP_HABILITADO:-false}"
+      APP_ENXOVAL_URL: "${APP_ENXOVAL_URL:-http://localhost:5180}"
+
+    volumes:
+      - ./realms:/opt/keycloak/data/import:ro
+    ports:
+      - "${KC_PORT:-8080}:8080"
+    networks:
+      - keycloak-net
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bash", "-ec", "exec 3<>/dev/tcp/127.0.0.1/9000; printf 'GET /health/ready HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3; head -n 1 <&3 | grep -q ' 200 '"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  dados_keycloak_db:
+    driver: local
+
+networks:
+  # Rede interna isolada para comunicação Keycloak ↔ banco
+  # As aplicações acessam o Keycloak via porta publicada no host (ou domínio).
+  keycloak-net:
+    driver: bridge

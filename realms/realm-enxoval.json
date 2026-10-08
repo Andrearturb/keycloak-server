@@ -1,0 +1,114 @@
+{
+  "realm": "enxoval",
+  "enabled": true,
+  "displayName": "Enxoval Inteligente",
+  "displayNameHtml": "<b>Enxoval Inteligente</b>",
+
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 30,
+
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "ssoSessionIdleTimeoutRememberMe": 2592000,
+  "ssoSessionMaxLifespanRememberMe": 2592000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": false,
+  "clientSessionIdleTimeout": 0,
+  "clientSessionMaxLifespan": 0,
+
+  "clients": [
+    {
+      "clientId": "webapp",
+      "name": "Enxoval Inteligente — Web",
+      "description": "Cliente público PKCE para o SPA React e futuro React Native",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "redirectUris": [
+        "${APP_ENXOVAL_URL}/*",
+        "http://localhost:5180/*",
+        "http://localhost:5173/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "${APP_ENXOVAL_URL}",
+        "http://localhost:5180",
+        "http://localhost:5173",
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${APP_ENXOVAL_URL}/##http://localhost:5180/##http://localhost:5173/##http://localhost:3000/"
+      },
+      "defaultClientScopes": ["basic", "web-origins", "acr", "profile", "roles", "email"],
+      "optionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"]
+    }
+  ],
+
+  "roles": {
+    "realm": [
+      {
+        "name": "familia",
+        "description": "Usuário família — acessa e gerencia o próprio enxoval"
+      }
+    ]
+  },
+
+  "defaultRoles": ["offline_access", "uma_authorization", "familia"],
+
+  "identityProviders": [
+    {
+      "alias": "google",
+      "displayName": "Google",
+      "providerId": "google",
+      "enabled": "${GOOGLE_IDP_HABILITADO}",
+      "trustEmail": true,
+      "storeToken": false,
+      "addReadTokenRoleOnCreate": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "${GOOGLE_CLIENT_ID}",
+        "clientSecret": "${GOOGLE_CLIENT_SECRET}",
+        "syncMode": "IMPORT",
+        "useJwksUrl": "true",
+        "hostedDomain": "",
+        "userIp": "false",
+        "offlineAccess": "false"
+      }
+    }
+  ],
+
+  "smtpServer": {},
+
+  "browserSecurityHeaders": {
+    "contentSecurityPolicyReportOnly": "",
+    "xContentTypeOptions": "nosniff",
+    "xRobotsTag": "none",
+    "xFrameOptions": "SAMEORIGIN",
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+    "xXSSProtection": "1; mode=block",
+    "strictTransportSecurity": "max-age=31536000; includeSubDomains"
+  }
+}

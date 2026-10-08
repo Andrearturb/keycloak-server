@@ -13,7 +13,7 @@
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "rememberMe": true,
-  "verifyEmail": false,
+  "verifyEmail": true,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
@@ -104,7 +104,17 @@
     }
   ],
 
-  "smtpServer": {},
+  "smtpServer": {
+    "host": "${SMTP_HOST}",
+    "port": "${SMTP_PORT}",
+    "from": "${SMTP_FROM}",
+    "fromDisplayName": "${SMTP_FROM_NAME}",
+    "auth": "${SMTP_AUTH}",
+    "user": "${SMTP_USER}",
+    "password": "${SMTP_PASSWORD}",
+    "starttls": "${SMTP_STARTTLS}",
+    "ssl": "${SMTP_SSL}"
+  },
 
   "browserSecurityHeaders": {
     "contentSecurityPolicyReportOnly": "",

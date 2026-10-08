@@ -57,6 +57,43 @@ Após mudar o tema, reconstrua a imagem com `docker compose up -d --build`.
 Para realms já existentes, selecione **Realm settings → Themes → Login theme → enxoval**.
 O tema herda os formulários do Keycloak e personaliza sua apresentação com CSS.
 
+## Confirmação de e-mail
+
+O realm exige e-mail verificado antes de concluir o login. Configure `SMTP_*` no
+`.env` antes de liberar cadastro. Para desenvolvimento, use:
+
+```env
+COMPOSE_PROFILES=email-local
+MAILPIT_PORT=8026
+SMTP_HOST=mailpit
+SMTP_PORT=1025
+SMTP_FROM=nao-responda@enxoval.local
+SMTP_FROM_NAME=Enxoval Inteligente
+SMTP_AUTH=false
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_STARTTLS=false
+SMTP_SSL=false
+```
+
+Suba com `docker compose up -d --build`. Acesse http://localhost:8026 para ler
+as mensagens e abrir o link de confirmação. Mailpit captura e-mails localmente;
+não os entrega à internet. Em produção, desative o perfil `email-local` e use
+um SMTP de entrega com remetente autorizado, autenticação e TLS conforme o
+provedor. Não publique a caixa de testes.
+
+Para um realm já existente, execute no PowerShell:
+
+```powershell
+.\scripts\configurar-email.ps1
+```
+
+O script aplica somente `verifyEmail` e SMTP ao realm `enxoval`, lendo credenciais
+do `.env` sem exibi-las. Não reimporta nem apaga usuários. Alternativamente,
+configure **Realm settings → Email** e habilite **Login → Verify email** no console.
+Usuários existentes sem confirmação precisarão verificar o endereço no próximo
+login. Não marque seus e-mails como verificados manualmente para liberar acesso.
+
 ## Ativar login com Google
 
 1. Crie credenciais OAuth em https://console.cloud.google.com  

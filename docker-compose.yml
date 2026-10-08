@@ -1,4 +1,13 @@
 services:
+  # Caixa de e-mails apenas para desenvolvimento; não envia para a internet.
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    restart: unless-stopped
+    profiles: [email-local]
+    ports:
+      - "127.0.0.1:${MAILPIT_PORT:-8026}:8025"
+    networks:
+      - keycloak-net
   # ---------------------------------------------------------------------------
   # Banco de dados do Keycloak (PostgreSQL dedicado)
   # Separado do banco das aplicações — dados de identidade e dados de negócio
@@ -79,6 +88,15 @@ services:
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
       GOOGLE_IDP_HABILITADO: "${GOOGLE_IDP_HABILITADO:-false}"
       APP_ENXOVAL_URL: "${APP_ENXOVAL_URL:-http://localhost:5180}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_FROM: "${SMTP_FROM:-nao-responda@enxoval.local}"
+      SMTP_FROM_NAME: "${SMTP_FROM_NAME:-Enxoval Inteligente}"
+      SMTP_AUTH: "${SMTP_AUTH:-false}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      SMTP_STARTTLS: "${SMTP_STARTTLS:-true}"
+      SMTP_SSL: "${SMTP_SSL:-false}"
 
     volumes:
       - ./realms:/opt/keycloak/data/import:ro

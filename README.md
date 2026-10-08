@@ -94,6 +94,15 @@ configure **Realm settings → Email** e habilite **Login → Verify email** no 
 Usuários existentes sem confirmação precisarão verificar o endereço no próximo
 login. Não marque seus e-mails como verificados manualmente para liberar acesso.
 
+O tema `enxoval` consulta a sessão pendente a cada cinco segundos por até quinze
+minutos. Depois da confirmação, a aba original continua o login automaticamente,
+inclusive quando o link foi aberto em outro navegador (por exemplo, no VS Code).
+As consultas não reenviam e-mails e não seguem o callback OAuth em segundo plano.
+O link **Já confirmei meu e-mail — continuar** permite retomar manualmente.
+Se o link for aberto fora do navegador do cadastro, o Keycloak pode pedir um
+clique adicional para confirmar e mostrar apenas a mensagem de sucesso; volte à
+aba original para acessar a aplicação.
+
 ## Ativar login com Google
 
 1. Crie credenciais OAuth em https://console.cloud.google.com  
